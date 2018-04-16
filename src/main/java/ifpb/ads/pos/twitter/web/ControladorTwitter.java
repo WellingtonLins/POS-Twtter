@@ -3,12 +3,13 @@ package ifpb.ads.pos.twitter.web;
 import ifpb.ads.pos.twitter.AuthenticatorOfTwitter;
 import ifpb.ads.pos.twitter.Credentials;
 import ifpb.ads.pos.twitter.EndpointInTwitter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
-import javax.json.JsonObject;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -16,6 +17,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -29,9 +31,10 @@ public class ControladorTwitter {
 
     private Client builder = ClientBuilder.newClient();
 
-    private String max_id = "";
+    private static String ultimoID;
 
     private Map<String, Integer> seguidores = new HashMap<>();
+    private List<String> lista = new ArrayList<>();
 
     private Credentials getCredentials() {
         FacesContext facesContext = FacesContext.getCurrentInstance();
@@ -51,9 +54,7 @@ public class ControladorTwitter {
         return getMentions();
     }
 
-    public String getMax_id() {
-        return agarraMax_ID(getTweets());
-    }
+ 
 
     public Map<String, Integer> getSeguidores() {
         AuthenticatorOfTwitter authenticator = new AuthenticatorOfTwitter(getCredentials());
@@ -88,13 +89,12 @@ public class ControladorTwitter {
             JSONObject jo = (JSONObject) object;
 
             jo.getJSONObject("entities").getJSONArray("user_mentions").length();
-         
 
             System.out.println("Mentions: " + jo.getJSONObject("entities").getJSONArray("user_mentions").length());
             JSONArray mentions = jo.getJSONObject("entities").getJSONArray("user_mentions");
             for (int j = 0; j < mentions.length(); j++) {
                 System.out.println("Mentioned---> " + mentions.getJSONObject(j).getString("screen_name"));
-          array.put(object);
+                array.put(object);
             }
         }
 
@@ -113,21 +113,77 @@ public class ControladorTwitter {
 
     public String rodar() {
         int cont = 1;
-        int flag = 0;
+        boolean flag = true;
+        String maior = "";
         JSONArray ja = new JSONArray();
         do {
-            flag++;
-            if (flag == 0) {
-                ja.put(getTweets("0"));
+            if (flag) {
+                System.out.println("ENTROU NA FLAGGG");
+
+                JSONArray jSONArray = getTweets();
+
+                //debug
+                imprimeSaida(jSONArray, "jSONArray");
+                
+                maior = agarraMax_ID(jSONArray);
+                int length = jSONArray.length();
+                jSONArray.remove(length - 1);
+         
+                //debug
+                imprimeSaida(jSONArray, "Removendo do jSONArray");
+
+                //adionando objetos ao array para a impressao na tela
+                for (Object object : jSONArray) {
+                    JSONObject js = (JSONObject) object;
+                    ja.put(js);
+                }
+                flag = false;
 
             } else {
+                
+                System.out.println("SAIU SAIU SAIU DA FLAGG  " + maior);
+                JSONArray jSONArray = getTweets(maior);
+                
+                //atualizando maior id
+                 maior = agarraMax_ID(jSONArray);
+                int length = jSONArray.length();
+                jSONArray.remove(length - 1);
 
-                ja.put(getTweets());
+                for (Object object : jSONArray) {
+                    JSONObject js = (JSONObject) object;
+                    ja.put(js);
+                }
             }
 
             cont++;
         } while (cont <= 3);
+
+        JSONArray array_Ids3 = criaArrayComIds(ja);
+        System.out.println("FINAL jSONArray");
+        System.out.println("FINAL jSONArray");
+        System.out.println(array_Ids3);
+
         return ja.toString();
+    }
+
+    private void imprimeSaida(JSONArray jSONArray, String saida) throws JSONException {
+        System.out.println(saida);
+
+        JSONArray array_Ids = criaArrayComIds(jSONArray);
+
+        System.out.println(array_Ids);
+        System.out.println(saida + " FIM");
+
+    }
+
+    private JSONArray criaArrayComIds(JSONArray jSONArray) throws JSONException {
+        JSONArray array_Ids = new JSONArray();
+        for (Object object : jSONArray) {
+            JSONObject o = (JSONObject) object;
+
+            array_Ids.put(o.getString("id_str"));
+        }
+        return array_Ids;
     }
 
     private JSONArray getTweets() {
@@ -147,10 +203,10 @@ public class ControladorTwitter {
                 .get();
 
         JSONArray jsonArray = new JSONArray(update.readEntity(String.class));
-
         return jsonArray;
 
     }
+
     private JSONArray getTweets(String marcador) {
 
         AuthenticatorOfTwitter authenticator = new AuthenticatorOfTwitter(getCredentials());
@@ -158,6 +214,7 @@ public class ControladorTwitter {
 
         Map<String, String> map = new HashMap<>();
         map.put("count", "3");
+        map.put("include_rts", "true");
         map.put("max_id", marcador);
 
         EndpointInTwitter endpoint = new EndpointInTwitter("GET", webTarget.getUri().toString());
@@ -165,6 +222,7 @@ public class ControladorTwitter {
         WebTarget updateTarget = builder.target(webTarget.getUri().toString());
         Response update = updateTarget
                 .queryParam("count", "3")
+                .queryParam("include_rts", "true")
                 .queryParam("max_id", marcador)
                 .request().accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", headerAuthorization)
@@ -195,7 +253,14 @@ public class ControladorTwitter {
 
         JSONArray jsonArray = new JSONArray(update.readEntity(String.class));
 
-        return jsonArray.toString();
+        JSONArray array_Ids = new JSONArray();
+
+        for (Object object : jsonArray) {
+            JSONObject o = (JSONObject) object;
+
+            array_Ids.put(o.getString("id_str"));
+        }
+        return array_Ids.toString();
 
     }
 
@@ -204,7 +269,6 @@ public class ControladorTwitter {
         int length = jsonArray.length() - 1;
 
         max = jsonArray.getJSONObject(length).getString("id_str");
-        max_id = max;
         return max;
     }
 }
