@@ -31,8 +31,6 @@ public class ControladorTwitter {
 
     private Client builder = ClientBuilder.newClient();
 
-    private static String ultimoID;
-
     private Map<String, Integer> seguidores = new HashMap<>();
     private List<String> lista = new ArrayList<>();
 
@@ -53,8 +51,6 @@ public class ControladorTwitter {
     public String mensao() {
         return getMentions();
     }
-
- 
 
     public Map<String, Integer> getSeguidores() {
         AuthenticatorOfTwitter authenticator = new AuthenticatorOfTwitter(getCredentials());
@@ -112,7 +108,10 @@ public class ControladorTwitter {
     }
 
     public String rodar() {
-        int cont = 1;
+        String aux = "";
+        String aux2 = "";
+
+        boolean cont = true;
         boolean flag = true;
         String maior = "";
         JSONArray ja = new JSONArray();
@@ -124,11 +123,11 @@ public class ControladorTwitter {
 
                 //debug
                 imprimeSaida(jSONArray, "jSONArray");
-                
+
                 maior = agarraMax_ID(jSONArray);
                 int length = jSONArray.length();
                 jSONArray.remove(length - 1);
-         
+
                 //debug
                 imprimeSaida(jSONArray, "Removendo do jSONArray");
 
@@ -140,12 +139,19 @@ public class ControladorTwitter {
                 flag = false;
 
             } else {
-                
+                aux = maior;
                 System.out.println("SAIU SAIU SAIU DA FLAGG  " + maior);
                 JSONArray jSONArray = getTweets(maior);
-                
+
                 //atualizando maior id
-                 maior = agarraMax_ID(jSONArray);
+                maior = agarraMax_ID(jSONArray);
+
+                aux2 = maior;
+                
+                if (aux.equals(aux2)) {
+                    cont = false;
+                }
+                    aux = maior;
                 int length = jSONArray.length();
                 jSONArray.remove(length - 1);
 
@@ -155,16 +161,16 @@ public class ControladorTwitter {
                 }
             }
 
-            cont++;
-        } while (cont <= 3);
+//            cont++;
+        } while (cont);
 
         JSONArray array_Ids3 = criaArrayComIds(ja);
-        System.out.println("FINAL jSONArray");
         System.out.println("FINAL jSONArray");
         System.out.println(array_Ids3);
 
         return ja.toString();
     }
+//debug
 
     private void imprimeSaida(JSONArray jSONArray, String saida) throws JSONException {
         System.out.println(saida);
@@ -175,6 +181,7 @@ public class ControladorTwitter {
         System.out.println(saida + " FIM");
 
     }
+//debug
 
     private JSONArray criaArrayComIds(JSONArray jSONArray) throws JSONException {
         JSONArray array_Ids = new JSONArray();
@@ -193,11 +200,13 @@ public class ControladorTwitter {
 
         Map<String, String> map = new HashMap<>();
         map.put("count", "3");
+        map.put("include_rts", "true");
         EndpointInTwitter endpoint = new EndpointInTwitter("GET", webTarget.getUri().toString());
         String headerAuthorization = authenticator.in(endpoint).authenticate(map);
         WebTarget updateTarget = builder.target(webTarget.getUri().toString());
         Response update = updateTarget
                 .queryParam("count", "3")
+                .queryParam("include_rts", "true")
                 .request().accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", headerAuthorization)
                 .get();
@@ -241,12 +250,14 @@ public class ControladorTwitter {
 
         Map<String, String> map = new HashMap<>();
         map.put("count", "60");
+        map.put("include_rts", "true");
 
         EndpointInTwitter endpoint = new EndpointInTwitter("GET", webTarget.getUri().toString());
         String headerAuthorization = authenticator.in(endpoint).authenticate(map);
         WebTarget updateTarget = builder.target(webTarget.getUri().toString());
         Response update = updateTarget
                 .queryParam("count", "60")
+                .queryParam("include_rts", "true")
                 .request().accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", headerAuthorization)
                 .get();
