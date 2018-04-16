@@ -1,0 +1,8 @@
+version: '2'
+services:
+  web:
+    container_name: app-twitter
+    build: .
+    image: twitter-img
+    ports:
+     - "8080:8080"
