@@ -39,6 +39,8 @@ public class ControladorTwitter {
 
     private JSONArray ja = new JSONArray();
 
+  
+
     private Credentials getCredentials() {
         FacesContext facesContext = FacesContext.getCurrentInstance();
         HttpSession session = (HttpSession) facesContext.getExternalContext().getSession(false);
@@ -106,7 +108,6 @@ public class ControladorTwitter {
 //
 //        return listaNomes;
 //    }
-
     public String getMentions() {
 //    public Map<String, Integer> getMentions() {
 
@@ -119,7 +120,33 @@ public class ControladorTwitter {
             jo.getJSONObject("entities").getJSONArray("user_mentions").length();
 
             System.out.println("Mentions: " + jo.getJSONObject("entities").getJSONArray("user_mentions").length());
+
             JSONArray mentions = jo.getJSONObject("entities").getJSONArray("user_mentions");
+
+            for (int j = 0; j < mentions.length(); j++) {
+                System.out.println("Mentioned---> " + mentions.getJSONObject(j).getString("screen_name"));
+                array.put(mentions.getJSONObject(j).getString("screen_name"));
+            }
+        }
+
+        return array.toString();
+    }
+
+    public String getRetwittes() {
+//    public Map<String, Integer> getMentions() {
+
+        JSONArray array = new JSONArray();
+
+        JSONArray jsonObject = ja;
+        for (Object object : jsonObject) {
+            JSONObject jo = (JSONObject) object;
+
+            jo.getJSONObject("entities").getJSONArray("user_mentions").length();
+
+            System.out.println("Mentions: " + jo.getJSONObject("entities").getJSONArray("user_mentions").length());
+
+            JSONArray mentions = jo.getJSONObject("entities").getJSONArray("user_mentions");
+
             for (int j = 0; j < mentions.length(); j++) {
                 System.out.println("Mentioned---> " + mentions.getJSONObject(j).getString("screen_name"));
                 array.put(mentions.getJSONObject(j).getString("screen_name"));
@@ -281,34 +308,31 @@ public class ControladorTwitter {
         max = jsonArray.getJSONObject(length).getString("id_str");
         return max;
     }
-    
-    public String tabularMencao(){
 
-        String mensao = mensao().trim();
+    public String tabularMencao() {
 
-        
-        String modificada = mensao.substring(1, mensao.length() - 1);
+        String[] strings = convertJsonStringParaArray();
 
-        String[] strings = Arrays.stream(modificada.split(","))
-                .map(s -> s.substring(1, s.length() - 1))
-                .toArray(String[]::new);
-        
-        
-        List<String> lista =  Arrays.asList(strings);
-//        List<String> lista = Arrays.asList("oe1cxw", "miolivc", "brega_falcao", "andrematurano", "nosborcastilho", "SamiPietikainen", "natan_severo", "ricardojob", "TecRahul", "JoeNihon", "gpantuza", "ricardojob", "ricardojob", "mkyong", "mkyong", "iamfutureproof", "YouTube", "YouTube", "MarcosBrizeno", "labnol", "SlideShare", "MarcosBrizeno", "loiane", "SlideShare", "YouTube", "jucindra", "SlideShare", "YouTube", "YouTube", "algaworks", "YouTube", "GalantiAndrea", "rafa_cz", "algaworks", "Tutorialzine", "wordpressdotcom");
+        List<String> lista = Arrays.asList(strings);
         Map<String, Integer> mencaoMap = new HashMap<>();
 
-        //filtrando lista
+        List<MensaoDaDos> lm = new ArrayList();
+        //filtrando lista para ficar sem repetição
         Set<String> set = new HashSet<>(lista);
         List<String> listaFitrada = new ArrayList<>(set);
 
         for (int i = 0; i < set.size(); i++) {
             mencaoMap.put(listaFitrada.get(i), Collections.frequency(lista, listaFitrada.get(i)));
+
+            MensaoDaDos m = new MensaoDaDos(listaFitrada.get(i), Collections.frequency(lista, listaFitrada.get(i)));
+            lm.add(m);
         }
 
         List<String> retorno = new ArrayList();
         final String format = "Seguidor: %s possui: %d mencao";
+
         final Set<String> chaves = mencaoMap.keySet(); // as chaves são os ids
+
         for (final String chave : chaves) {
             retorno.add(chave + "  " + mencaoMap.get(chave));
             System.out.println(String.format(format, chave, mencaoMap.get(chave)));
@@ -330,20 +354,51 @@ public class ControladorTwitter {
 
         System.out.println("SET sem duplicatas ===>  " + set.size());
         System.err.println("Set ===> " + set);
-        System.out.println("Repetidos com os repetidos ===>  " + repetidos.size());
+        System.out.println("Repetidos tamanho ===>  " + repetidos.size());
         System.err.println("Repetidos ===> " + repetidos);
         System.err.println("MencaoMap");
         System.err.println(mencaoMap);
 
-        
         return String.valueOf(retorno);
     }
-    
-    public void iniciar(){
-       seguidores();
-       rodar();
-       mensao();
-    
+
+    public String top10Mencao() {
+         List<MensaoDaDos> lm = new ArrayList();
+         String[] strings = convertJsonStringParaArray();
+
+        List<String> lista = Arrays.asList(strings);
+        //filtrando lista para ficar sem repetição
+        Set<String> set = new HashSet<>(lista);
+        List<String> listaFitrada = new ArrayList<>(set);
+
+        for (int i = 0; i < set.size(); i++) {
+            MensaoDaDos m = new MensaoDaDos(listaFitrada.get(i), Collections.frequency(lista, listaFitrada.get(i)));
+            lm.add(m);
+        }
+
+        Collections.sort(lm);
+        List<MensaoDaDos> rankMencao = new ArrayList();
+        for (int i = 0; i < 10; i++) {
+            rankMencao.add(lm.get(i));
+        }
+        return rankMencao.toString();
+
+    }
+
+    private String[] convertJsonStringParaArray() {
+        String mensao = mensao().trim();
+        String modificada = mensao.substring(1, mensao.length() - 1);
+        String[] strings = Arrays.stream(modificada.split(","))
+                .map(s -> s.substring(1, s.length() - 1))
+                .toArray(String[]::new);
+        return strings;
+    }
+
+    public void iniciar() {
+        seguidores();
+        rodar();
+        mensao();
+
     }
 
 }
