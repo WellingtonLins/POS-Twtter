@@ -36,7 +36,7 @@ public class ControladorTwitter {
     private Client builder = ClientBuilder.newClient();
 
     private Map<String, Integer> seguidores = new HashMap<>();
-    
+
     private JSONArray ja = new JSONArray();
 
     private Credentials getCredentials() {
@@ -80,6 +80,33 @@ public class ControladorTwitter {
         return seguidores;
     }
 
+//    public List<String> getNomeSeguidores() {
+//        AuthenticatorOfTwitter authenticator = new AuthenticatorOfTwitter(getCredentials());
+//        WebTarget webTarget = builder.target("https://api.twitter.com/1.1/followers/list.json");
+//
+//        EndpointInTwitter endpoint = new EndpointInTwitter("GET", webTarget.getUri().toString());
+//        String headerAuthorization = authenticator.in(endpoint).authenticate();
+//        WebTarget updateTarget = builder.target(webTarget.getUri().toString());
+//        Response update = updateTarget
+//                .request().accept(MediaType.APPLICATION_JSON)
+//                .header("Authorization", headerAuthorization)
+//                .get();
+//
+//        List<String> listaNomes = new ArrayList();
+//
+//        JSONObject jsonObject = new JSONObject(update.readEntity(String.class));
+//
+//        JSONArray jsonArray = jsonObject.getJSONArray("users");
+//
+//        for (Object object : jsonArray) {
+//                      JSONObject o = (JSONObject) object;
+//                      
+//            listaNomes.add(o.getString("screen_name"));
+//        }
+//
+//        return listaNomes;
+//    }
+
     public String getMentions() {
 //    public Map<String, Integer> getMentions() {
 
@@ -101,7 +128,7 @@ public class ControladorTwitter {
 
         return array.toString();
     }
-  
+
     private double calculador() {
 
         double mentions = 0;
@@ -256,13 +283,19 @@ public class ControladorTwitter {
     }
     
     public String tabularMencao(){
-       
-//     String mensao = mensao().trim();
-//     String modificada = mensao.substring(1, mensao.length() - 1);      
-//        List<String> lista = Arrays.asList(modificada);
 
-        List<String> lista = Arrays.asList("oe1cxw", "miolivc", "brega_falcao", "andrematurano", "nosborcastilho", "SamiPietikainen", "natan_severo", "ricardojob", "TecRahul", "JoeNihon", "gpantuza", "ricardojob", "ricardojob", "mkyong", "mkyong", "iamfutureproof", "YouTube", "YouTube", "MarcosBrizeno", "labnol", "SlideShare", "MarcosBrizeno", "loiane", "SlideShare", "YouTube", "jucindra", "SlideShare", "YouTube", "YouTube", "algaworks", "YouTube", "GalantiAndrea", "rafa_cz", "algaworks", "Tutorialzine", "wordpressdotcom");
+        String mensao = mensao().trim();
 
+        
+        String modificada = mensao.substring(1, mensao.length() - 1);
+
+        String[] strings = Arrays.stream(modificada.split(","))
+                .map(s -> s.substring(1, s.length() - 1))
+                .toArray(String[]::new);
+        
+        
+        List<String> lista =  Arrays.asList(strings);
+//        List<String> lista = Arrays.asList("oe1cxw", "miolivc", "brega_falcao", "andrematurano", "nosborcastilho", "SamiPietikainen", "natan_severo", "ricardojob", "TecRahul", "JoeNihon", "gpantuza", "ricardojob", "ricardojob", "mkyong", "mkyong", "iamfutureproof", "YouTube", "YouTube", "MarcosBrizeno", "labnol", "SlideShare", "MarcosBrizeno", "loiane", "SlideShare", "YouTube", "jucindra", "SlideShare", "YouTube", "YouTube", "algaworks", "YouTube", "GalantiAndrea", "rafa_cz", "algaworks", "Tutorialzine", "wordpressdotcom");
         Map<String, Integer> mencaoMap = new HashMap<>();
 
         //filtrando lista
@@ -277,7 +310,7 @@ public class ControladorTwitter {
         final String format = "Seguidor: %s possui: %d mencao";
         final Set<String> chaves = mencaoMap.keySet(); // as chaves são os ids
         for (final String chave : chaves) {
-            retorno.add(chave + "  "+ mencaoMap.get(chave));
+            retorno.add(chave + "  " + mencaoMap.get(chave));
             System.out.println(String.format(format, chave, mencaoMap.get(chave)));
         }
 
@@ -302,7 +335,7 @@ public class ControladorTwitter {
         System.err.println("MencaoMap");
         System.err.println(mencaoMap);
 
-    return String.valueOf(retorno);
+        return String.valueOf(retorno);
     }
- 
+
 }
