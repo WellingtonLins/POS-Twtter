@@ -203,13 +203,13 @@ public class ControladorTwitter {
         WebTarget webTarget = builder.target("https://api.twitter.com/1.1/statuses/user_timeline.json");
 
         Map<String, String> map = new HashMap<>();
-        map.put("count", "3");
+        map.put("count", "30");
         map.put("include_rts", "true");
         EndpointInTwitter endpoint = new EndpointInTwitter("GET", webTarget.getUri().toString());
         String headerAuthorization = authenticator.in(endpoint).authenticate(map);
         WebTarget updateTarget = builder.target(webTarget.getUri().toString());
         Response update = updateTarget
-                .queryParam("count", "3")
+                .queryParam("count", "30")
                 .queryParam("include_rts", "true")
                 .request().accept(MediaType.APPLICATION_JSON)
                 .header("Authorization", headerAuthorization)
@@ -226,7 +226,7 @@ public class ControladorTwitter {
         WebTarget webTarget = builder.target("https://api.twitter.com/1.1/statuses/user_timeline.json");
 
         Map<String, String> map = new HashMap<>();
-        map.put("count", "3");
+        map.put("count", "30");
         map.put("include_rts", "true");
         map.put("max_id", marcador);
 
@@ -234,7 +234,7 @@ public class ControladorTwitter {
         String headerAuthorization = authenticator.in(endpoint).authenticate(map);
         WebTarget updateTarget = builder.target(webTarget.getUri().toString());
         Response update = updateTarget
-                .queryParam("count", "3")
+                .queryParam("count", "30")
                 .queryParam("include_rts", "true")
                 .queryParam("max_id", marcador)
                 .request().accept(MediaType.APPLICATION_JSON)
