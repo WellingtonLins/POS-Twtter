@@ -4,9 +4,13 @@ import ifpb.ads.pos.twitter.AuthenticatorOfTwitter;
 import ifpb.ads.pos.twitter.Credentials;
 import ifpb.ads.pos.twitter.EndpointInTwitter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
@@ -97,7 +101,7 @@ public class ControladorTwitter {
 
         return array.toString();
     }
-
+  
     private double calculador() {
 
         double mentions = 0;
@@ -242,39 +246,6 @@ public class ControladorTwitter {
         return jsonArray;
 
     }
-//debug
-
-    public String todosTweets() {
-
-        AuthenticatorOfTwitter authenticator = new AuthenticatorOfTwitter(getCredentials());
-        WebTarget webTarget = builder.target("https://api.twitter.com/1.1/statuses/user_timeline.json");
-
-        Map<String, String> map = new HashMap<>();
-        map.put("count", "60");
-        map.put("include_rts", "true");
-
-        EndpointInTwitter endpoint = new EndpointInTwitter("GET", webTarget.getUri().toString());
-        String headerAuthorization = authenticator.in(endpoint).authenticate(map);
-        WebTarget updateTarget = builder.target(webTarget.getUri().toString());
-        Response update = updateTarget
-                .queryParam("count", "60")
-                .queryParam("include_rts", "true")
-                .request().accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", headerAuthorization)
-                .get();
-
-        JSONArray jsonArray = new JSONArray(update.readEntity(String.class));
-
-        JSONArray array_Ids = new JSONArray();
-
-        for (Object object : jsonArray) {
-            JSONObject o = (JSONObject) object;
-
-            array_Ids.put(o.getString("id_str"));
-        }
-        return array_Ids.toString();
-
-    }
 
     private String agarraMax_ID(JSONArray jsonArray) {
         String max = "";
@@ -283,4 +254,55 @@ public class ControladorTwitter {
         max = jsonArray.getJSONObject(length).getString("id_str");
         return max;
     }
+    
+    public String tabularMencao(){
+       
+//     String mensao = mensao().trim();
+//     String modificada = mensao.substring(1, mensao.length() - 1);      
+//        List<String> lista = Arrays.asList(modificada);
+
+        List<String> lista = Arrays.asList("oe1cxw", "miolivc", "brega_falcao", "andrematurano", "nosborcastilho", "SamiPietikainen", "natan_severo", "ricardojob", "TecRahul", "JoeNihon", "gpantuza", "ricardojob", "ricardojob", "mkyong", "mkyong", "iamfutureproof", "YouTube", "YouTube", "MarcosBrizeno", "labnol", "SlideShare", "MarcosBrizeno", "loiane", "SlideShare", "YouTube", "jucindra", "SlideShare", "YouTube", "YouTube", "algaworks", "YouTube", "GalantiAndrea", "rafa_cz", "algaworks", "Tutorialzine", "wordpressdotcom");
+
+        Map<String, Integer> mencaoMap = new HashMap<>();
+
+        //filtrando lista
+        Set<String> set = new HashSet<>(lista);
+        List<String> listaFitrada = new ArrayList<>(set);
+
+        for (int i = 0; i < set.size(); i++) {
+            mencaoMap.put(listaFitrada.get(i), Collections.frequency(lista, listaFitrada.get(i)));
+        }
+
+        List<String> retorno = new ArrayList();
+        final String format = "Seguidor: %s possui: %d mencao";
+        final Set<String> chaves = mencaoMap.keySet(); // as chaves são os ids
+        for (final String chave : chaves) {
+            retorno.add(chave + "  "+ mencaoMap.get(chave));
+            System.out.println(String.format(format, chave, mencaoMap.get(chave)));
+        }
+
+        Set<String> repetidos = new HashSet<>();
+
+        System.out.println("Tamanho original ===>  " + lista.size());
+
+//pegando elementos repetidos
+        for (int i = 0; i < lista.size(); i++) {
+            for (int j = i + 1; j < lista.size(); j++) {
+                if (lista.get(i).equals(lista.get(j))) {
+                    repetidos.add(lista.get(j));
+
+                }
+            }
+        }
+
+        System.out.println("SET sem duplicatas ===>  " + set.size());
+        System.err.println("Set ===> " + set);
+        System.out.println("Repetidos com os repetidos ===>  " + repetidos.size());
+        System.err.println("Repetidos ===> " + repetidos);
+        System.err.println("MencaoMap");
+        System.err.println(mencaoMap);
+
+    return String.valueOf(retorno);
+    }
+ 
 }
