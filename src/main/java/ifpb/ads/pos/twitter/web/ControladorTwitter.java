@@ -32,7 +32,8 @@ public class ControladorTwitter {
     private Client builder = ClientBuilder.newClient();
 
     private Map<String, Integer> seguidores = new HashMap<>();
-    private List<String> lista = new ArrayList<>();
+    
+    private JSONArray ja = new JSONArray();
 
     private Credentials getCredentials() {
         FacesContext facesContext = FacesContext.getCurrentInstance();
@@ -80,7 +81,7 @@ public class ControladorTwitter {
 
         JSONArray array = new JSONArray();
 
-        JSONArray jsonObject = getTweets();
+        JSONArray jsonObject = ja;
         for (Object object : jsonObject) {
             JSONObject jo = (JSONObject) object;
 
@@ -90,7 +91,7 @@ public class ControladorTwitter {
             JSONArray mentions = jo.getJSONObject("entities").getJSONArray("user_mentions");
             for (int j = 0; j < mentions.length(); j++) {
                 System.out.println("Mentioned---> " + mentions.getJSONObject(j).getString("screen_name"));
-                array.put(object);
+                array.put(mentions.getJSONObject(j).getString("screen_name"));
             }
         }
 
@@ -110,11 +111,11 @@ public class ControladorTwitter {
     public String rodar() {
         String aux = "";
         String aux2 = "";
+        String maior = "";
 
         boolean cont = true;
         boolean flag = true;
-        String maior = "";
-        JSONArray ja = new JSONArray();
+
         do {
             if (flag) {
                 System.out.println("ENTROU NA FLAGGG");
@@ -147,11 +148,11 @@ public class ControladorTwitter {
                 maior = agarraMax_ID(jSONArray);
 
                 aux2 = maior;
-                
+
                 if (aux.equals(aux2)) {
                     cont = false;
                 }
-                    aux = maior;
+                aux = maior;
                 int length = jSONArray.length();
                 jSONArray.remove(length - 1);
 
@@ -161,7 +162,6 @@ public class ControladorTwitter {
                 }
             }
 
-//            cont++;
         } while (cont);
 
         JSONArray array_Ids3 = criaArrayComIds(ja);
@@ -170,8 +170,8 @@ public class ControladorTwitter {
 
         return ja.toString();
     }
-//debug
 
+//debug
     private void imprimeSaida(JSONArray jSONArray, String saida) throws JSONException {
         System.out.println(saida);
 
@@ -242,8 +242,9 @@ public class ControladorTwitter {
         return jsonArray;
 
     }
+//debug
 
-    public String todosTweets() {//??
+    public String todosTweets() {
 
         AuthenticatorOfTwitter authenticator = new AuthenticatorOfTwitter(getCredentials());
         WebTarget webTarget = builder.target("https://api.twitter.com/1.1/statuses/user_timeline.json");
