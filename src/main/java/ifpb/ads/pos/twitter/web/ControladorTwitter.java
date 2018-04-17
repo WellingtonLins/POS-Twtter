@@ -335,7 +335,15 @@ public class ControladorTwitter {
         System.err.println("MencaoMap");
         System.err.println(mencaoMap);
 
+        
         return String.valueOf(retorno);
+    }
+    
+    public void iniciar(){
+       seguidores();
+       rodar();
+       mensao();
+    
     }
 
 }
